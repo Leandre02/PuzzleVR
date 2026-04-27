@@ -1,14 +1,14 @@
-# Whack-a-Mole VR
+# Puzzle VR
 
-**Auteur :** Léandre Kanmegne  
+**Auteur :** Léandre Kanmegne & Bady Pascal
 **Cours :** Environnements Immersifs — Cégep de Victoriaville  
 **Session :** Hiver 2026
 
----
-
 ## Description
 
-Application de réalité virtuelle pour Meta Quest 2 développée avec Unity 6.3. Le joueur attrape un marteau et frappe des cibles qui apparaissent et disparaissent dans l'environnement. Chaque cible frappée rapporte des points. La partie se déroule sur 60 secondes, après quoi le score final est affiché et le joueur peut recommencer.
+Jeu de puzzle en réalité virtuelle pour Meta Quest 2 développé avec Unity 6.3. Le joueur doit assembler une maquette en récupérant des pièces dispersées dans l'environnement et en les plaçant dans les bons emplacements. Chaque pièce a une forme distincte (cube, cylindre, sphère) qui correspond à un socket spécifique sur la maquette.
+
+Le jeu fonctionne en mode endurance : à chaque tour complété, le joueur gagne du temps bonus pour continuer. La partie se termine lorsque le timer atteint zéro. Le score correspond au nombre de tours complétés.
 
 ---
 
@@ -29,32 +29,33 @@ Application de réalité virtuelle pour Meta Quest 2 développée avec Unity 6.3
 
 - Free Pop Sound Effects Pack 1.0 — sons d'interaction (apparition des cibles, impact)
 
----
-
 ## Fonctionnalités implémentées
 
-- Grab cinématique du marteau via XR Interaction Toolkit
-- Détection des coups par contact physique (OnTriggerEnter)
-- Spawn dynamique des cibles à positions aléatoires
-- Disparition automatique des cibles non frappées
-- Boucle de jeu complète : menu -> partie -> fin -> rejouer
-- Score et minuterie en temps réel
+- Grab cinématique des pièces via XR Interaction Toolkit
+- Détection automatique du placement correct via XR Socket Interactor
+- Filtrage par Interaction Layers (chaque socket n'accepte que sa forme)
+- Spawn aléatoire des pièces à différents points à chaque tour
+- Boucle de jeu en mode endurance : menu → tours successifs → fin → rejouer
+- Système de bonus de temps à chaque tour complété
+- Score basé sur le nombre de tours complétés
+- Visuels fantômes sur la maquette pour guider le placement
 - UI en World Space (aucun Canvas en Screen Space)
-- Retour haptique distinct au grab et à l'impact
-- Son spatial lié à l'apparition des cibles et à l'impact du marteau
+- Hiérarchie de feedback haptique : grab d'une pièce, tour complété, fin de partie
+- Sons spatiaux au grab et au placement des pièces
 
 ---
 
 ## Structure des scripts
 
-| Script                 | Responsabilité                                                |
-| ---------------------- | ------------------------------------------------------------- |
-| `GestionnaireJeu.cs`   | États de jeu, score, minuterie, gestion des panneaux UI       |
-| `GestionnaireSpawn.cs` | Création et destruction dynamique des cibles                  |
-| `Cible.cs`             | Détection du coup, déclenchement de l'event, son d'apparition |
-| `FeedbackMarteau.cs`   | Retour haptique au grab et à l'impact, son d'impact           |
+| Script                  | Responsabilité                                                       |
+| ----------------------- | -------------------------------------------------------------------- |
+| `GestionnaireJeu.cs`    | États de jeu, timer, score, gestion des panneaux UI, logique de tour |
+| `GestionnaireSpawn.cs`  | Création des pièces aux points de spawn aléatoires                   |
+| `GestionnairePuzzle.cs` | Détection du placement correct via les événements des sockets        |
+| `FeedbackPiece.cs`      | Retour haptique et audio lors du grab d'une pièce                    |
+| `VisuelSocket.cs`       | Gère l'affichage des fantômes guides sur la maquette                 |
 
-La communication entre `Cible` et `GestionnaireJeu` passe par un event C# statique (`Action<int> OnCibleTouchee`) pour découpler les deux scripts.
+La communication entre `GestionnairePuzzle` et `GestionnaireJeu` se fait via un singleton (`GestionnaireJeu.instance`). La détection du placement utilise les événements `selectEntered` du XR Interaction Toolkit, ce qui évite les vérifications manuelles de tag — la validation de la bonne forme est entièrement déléguée aux Interaction Layer Masks configurés sur chaque socket.
 
 ---
 
@@ -66,7 +67,7 @@ La communication entre `Cible` et `GestionnaireJeu` passe par un event C# statiq
 
 **Déploiement sur casque** — Le premier build IL2CPP pour Android ARM64 prend considérablement de temps. L'utilisation du cache entre les builds suivants et la validation systématique sur le casque avant la remise finale ont permis d'éviter les surprises de dernière minute.
 
-**XRbaseController - Obsolete** - L'utilisation du component XRbaseController renvoie un warning CS0618: 'XRBaseController' is obsolete: 'XRBaseController has been deprecated dans la version 3.0.0 du XR interaction Toolkit. Elle a été officiellement remplacé par XRBaseInputInteractor 
+**XRbaseController - Obsolete** - L'utilisation du component XRbaseController renvoie un warning CS0618: 'XRBaseController' is obsolete: 'XRBaseController has been deprecated dans la version 3.0.0 du XR interaction Toolkit. Elle a été officiellement remplacé par XRBaseInputInteractor
 Source : https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@3.0/manual/upgrade-guide-3.0.html
 
 ---

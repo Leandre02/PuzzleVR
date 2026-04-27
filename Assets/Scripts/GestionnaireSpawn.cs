@@ -2,32 +2,36 @@ using UnityEngine;
 using System.Collections;
 
 /// <summary>
-/// Classe pour gérer le spawn des cibles à des points aléatoires, avec un délai entre chaque spawn, et les faire disparaître après un certain temps
-////// Inspirée des exercices de peinture et de VR où des objets sont instanciés/détruits dynamiquement via des coroutines,
-/// adaptée ici au contexte du Whack-a-Mole (cibles temporaires qui apparaissent et disparaissent).
+/// Classe pour gérer le spawn des pièces du puzzle à des points aléatoires.
+/// Chaque pièce est spawnée une seule fois par tour.
+/// Inspirée des exercices de VR où des objets sont instanciés dynamiquement via des coroutines.
 /// Références :
-///  - Cégep de Victoriaville. Exercice 3 — Peinture VR. Environnements Immersifs, 2026. https://envimmersif-cegepvicto.github.io/exercice_peinture_vr/
-///  - Cégep de Victoriaville. Travail pratique — Whack-a-Mole VR. Environnements Immersifs, 2026. https://envimmersif-cegepvicto.github.io/tp_sommatif1_vr/
+///  - Cégep de Victoriaville. Exercice 3 — Peinture VR. Environnements Immersifs, 2026.
+///  - Cégep de Victoriaville. Travail pratique — Whack-a-Mole VR. Environnements Immersifs, 2026.
 /// </summary>
 public class GestionnaireSpawn : MonoBehaviour
 {
-    [Header("Prefab")]
-    [SerializeField] private GameObject ciblePrefab;
+    [Header("Prefabs des pièces")]
+    [SerializeField] private GameObject[] prefabsPieces;
 
     [Header("Paramètres de spawn")]
-    [SerializeField] private float tempsAvantDisparition = 2f;
-    [SerializeField] private float delaiEntreSpawns = 1.5f;
-    
+    [SerializeField] private float delaiEntreSpawns = 0.3f;
 
     [Header("Points de spawn")]
     [SerializeField] private Transform[] pointsDeSpawn;
 
+    private Coroutine spawnRoutine;
+
     /// <summary>
-    /// Appelée par GestionnaireJeu quand la partie commence
+    /// Appelée par GestionnaireJeu quand un tour commence
     /// </summary>
     public void DemarrerSpawn()
     {
-        StartCoroutine(SpawnCibles());
+        if (spawnRoutine != null)
+        {
+            StopCoroutine(spawnRoutine);
+        }
+        spawnRoutine = StartCoroutine(SpawnPieces());
     }
 
     /// <summary>
@@ -35,26 +39,46 @@ public class GestionnaireSpawn : MonoBehaviour
     /// </summary>
     public void ArreterSpawn()
     {
-        StopAllCoroutines();
+        if (spawnRoutine != null)
+        {
+            StopCoroutine(spawnRoutine);
+            spawnRoutine = null;
+        }
     }
 
     /// <summary>
-    /// Permet de faire spawn des cibles à des points aléatoires, avec un délai entre chaque spawn, et les détruit après un certain temps
-    /// @author Léandre Kanmegne
-    /// Code inspiré de la coroutine d'apparition des meteores - projet final - Cours de jeux 3D A25
+    /// Spawne chaque pièce une seule fois à un point aléatoire
     /// </summary>
-    /// <returns></returns>
-    IEnumerator SpawnCibles()
+    IEnumerator SpawnPieces()
     {
-        while (true)
-        {
-            int index = Random.Range(0, pointsDeSpawn.Length);
-            Transform point = pointsDeSpawn[index];
+        // Mélange les points de spawn pour que chaque pièce aille à un point différent
+        Transform[] pointsMelanges = MelangerPoints();
 
-            GameObject cible = Instantiate(ciblePrefab, point.position, Quaternion.identity);
-            Destroy(cible, tempsAvantDisparition);
+        for (int i = 0; i < prefabsPieces.Length; i++)
+        {
+            // Un point de spawn différent pour chaque pièce
+            Transform point = pointsMelanges[i % pointsMelanges.Length];
+
+            Instantiate(prefabsPieces[i], point.position, Quaternion.identity);
 
             yield return new WaitForSeconds(delaiEntreSpawns);
         }
+    }
+
+    /// <summary>
+    /// Mélange aléatoirement les points de spawn
+    /// Code généré par Claude sonnet 4.6, Mars 2026
+    /// </summary>
+    Transform[] MelangerPoints()
+    {
+        Transform[] copie = (Transform[])pointsDeSpawn.Clone();
+        for (int i = copie.Length - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            Transform temp = copie[i];
+            copie[i] = copie[j];
+            copie[j] = temp;
+        }
+        return copie;
     }
 }
