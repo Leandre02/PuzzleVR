@@ -1,0 +1,2 @@
+C:\Coding\Environ_immers\Git\PuzzleVR\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\CMakeLists.txt
+C:\Coding\Environ_immers\Git\PuzzleVR\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\GameActivity\CMakeLists.txt
