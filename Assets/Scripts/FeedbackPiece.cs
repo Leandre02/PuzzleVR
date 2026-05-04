@@ -18,13 +18,24 @@ public class FeedbackPiece : MonoBehaviour
     [SerializeField] private float amplitudeGrab = 0.5f;
     [SerializeField] private float dureeGrab = 0.1f;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip sonSpawn;
+
     private XRGrabInteractable grabInteractable;
     private XRBaseInputInteractor controller; // Nouveau component du XR interaction Toolkit
-
+    private AudioSource audioSource;
 
     void Awake()
     {
         grabInteractable = GetComponent<XRGrabInteractable>();
+        audioSource = GetComponent<AudioSource>();
+
+        audioSource.spatialBlend = 1f;
+    }
+
+    void Start()
+    {
+        audioSource.PlayOneShot(sonSpawn); // joue au moment du spawn
     }
 
     void OnEnable()

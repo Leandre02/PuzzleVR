@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 /// <summary>
 /// Spawne les pièces une par une. La pièce suivante apparaît
@@ -18,14 +19,19 @@ public class GestionnaireSpawn : MonoBehaviour
 
     private int indexPiece = 0;
 
+    private GameObject pieceActuelle;
+    [SerializeField] private float delaiRespawn = 3f;
+
     void OnEnable()
     {
         GestionnairePuzzle.OnPieceDeposee += SpawnProchainepiece;
+        
     }
 
     void OnDisable()
     {
         GestionnairePuzzle.OnPieceDeposee -= SpawnProchainepiece;
+       
     }
 
     /// <summary>
@@ -34,7 +40,8 @@ public class GestionnaireSpawn : MonoBehaviour
     public void DemarrerSpawn()
     {
         indexPiece = 0;
-        SpawnProchainepiece(); // spawn la première pièce
+        pieceActuelle = null;
+        StartCoroutine(SpawnAvecDelai()); // spawn la première pièce
     }
 
     /// <summary>
@@ -50,6 +57,10 @@ public class GestionnaireSpawn : MonoBehaviour
     /// </summary>
     void SpawnProchainepiece()
     {
+        ArreterSpawn();
+        pieceActuelle = null; // pièce placée, on passe à la suivante
+        indexPiece++; 
+
         if (indexPiece >= prefabsPieces.Length) return;
 
         StartCoroutine(SpawnAvecDelai());
@@ -59,10 +70,26 @@ public class GestionnaireSpawn : MonoBehaviour
     {
         yield return new WaitForSeconds(delaiEntreSpawns);
 
-        // Point aléatoire parmi les points dispo
-        int indexPoint = Random.Range(0, pointsDeSpawn.Length);
-        Instantiate(prefabsPieces[indexPiece], pointsDeSpawn[indexPoint].position, Quaternion.identity);
+        while (indexPiece < prefabsPieces.Length)
+        {
+            if (pieceActuelle != null)
+            {
+                // Vérifie si la pièce est en train d'être tenue
+                var grab = pieceActuelle.GetComponent<XRGrabInteractable>();
+                if (grab != null && grab.isSelected)
+                {
+                    // Joueur tient la pièce - attend sans détruire
+                    yield return new WaitForSeconds(0.5f);
+                    continue;
+                }
+                Destroy(pieceActuelle);
+            }
 
-        indexPiece++;
+            int indexPoint = Random.Range(0, pointsDeSpawn.Length);
+            pieceActuelle = Instantiate(prefabsPieces[indexPiece],
+                pointsDeSpawn[indexPoint].position, Quaternion.identity);
+
+            yield return new WaitForSeconds(delaiRespawn);
+        }
     }
 }

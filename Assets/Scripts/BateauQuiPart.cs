@@ -1,55 +1,38 @@
 using UnityEngine;
 
 /// <summary>
-/// Une classe d'animation pour faire avancer un bateau vers l'avant à une vitesse spécifiée.
+/// Téléporte le bateau au loin à la fin de la partie.
 /// </summary>
 public class BateauQuiPart : MonoBehaviour
 {
-    public float vitesse = 0.5f; // La vitesse du bateau
-    public float vitesseFuite = 5f; // vitesse quand le temps est écoulé
 
-    private float vitesseActuelle;
-    private bool partieTerminee = false;
+    private Vector3 positionDepart;
 
     void Start()
     {
-        vitesseActuelle = vitesse; // Initialise la vitesse actuelle à la vitesse de base
+        positionDepart = transform.position;
     }
 
-    void Update()
-    {
-        // Fait avancer le bateau vers l'avant à la vitesse spécifiée
-        transform.Translate(Vector3.forward * vitesseActuelle * Time.deltaTime);
-
-        if (partieTerminee && transform.position.magnitude > 200f)
-        {
-            Destroy(gameObject);
-        }
-    }
-
-    /// <summary>
-    /// S'abonne à l'Evenement
-    /// </summary>
     void OnEnable()
     {
         GestionnaireJeu.onFinDePartie += OnFinDePartie;
+        GestionnaireJeu.onDebutPartie += OnDebutPartie;
     }
 
-    /// <summary>
-    /// Se desabonne à l'Evenement pour éviter les fuites mémoire
-    /// </summary>
     void OnDisable()
     {
         GestionnaireJeu.onFinDePartie -= OnFinDePartie;
+        GestionnaireJeu.onDebutPartie -= OnDebutPartie;
     }
 
-    /// <summary>
-    /// Une methode pour gérer la fin de partie, appelée par le GestionnaireJeu via un événement.
-    /// </summary>
-    /// <param name="toursCompletes">Le nombre de tours complétés avant la fin de la partie</param>
     private void OnFinDePartie(int toursCompletes)
     {
-        partieTerminee = true;
-        vitesseActuelle = vitesseFuite;
+        transform.position = new Vector3(0, -100f, 0);
+    }
+
+    private void OnDebutPartie()
+    {
+       
+        transform.position = positionDepart; // revient au début
     }
 }

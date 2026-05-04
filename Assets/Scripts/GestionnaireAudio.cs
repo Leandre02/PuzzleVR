@@ -21,6 +21,7 @@ public class GestionnaireAudio : MonoBehaviour
     void OnEnable()
     {
         GestionnaireJeu.onFinDePartie += OnFinDePartie;
+        GestionnaireJeu.onDebutPartie += OnDebutPartie;
     }
 
     /// <summary>
@@ -29,6 +30,7 @@ public class GestionnaireAudio : MonoBehaviour
     void OnDisable()
     {
         GestionnaireJeu.onFinDePartie -= OnFinDePartie;
+        GestionnaireJeu.onDebutPartie -= OnDebutPartie;
     }
 
     /// <summary>
@@ -38,6 +40,14 @@ public class GestionnaireAudio : MonoBehaviour
     private void OnFinDePartie(int toursCompletes)
     {
         JouerMusique(SonAmbiance); // revient à la musique du menu à la fin de la partie
+    }
+
+    /// <summary>
+    /// Une methode pour gerer le debut de partie
+    /// </summary>
+    private void OnDebutPartie()
+    {
+        JouerMusique(musiqueJeu); // remplace la musique menu automatiquement
     }
 
     /// <summary>
