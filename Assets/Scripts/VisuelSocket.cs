@@ -45,4 +45,15 @@ public class VisuelSocket : MonoBehaviour
             meshFantome.SetActive(true);
         }
     }
+
+    /// <summary>
+    /// Une methode pour reafficher le fantome a la fin du tour
+    /// </summary>
+    public void Reset()
+    {
+        if (meshFantome != null)
+        {
+            meshFantome.SetActive(true); 
+        }
+    }
 }

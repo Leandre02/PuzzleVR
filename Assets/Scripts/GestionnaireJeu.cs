@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
@@ -44,6 +45,8 @@ public class GestionnaireJeu : MonoBehaviour
     private int numeroTour = 1;
     private float tempsRestant;
     private bool partieEnCours = false;
+
+    public static event Action<int> onFinDePartie; // Event pour signaler la fin de partie avec le score final
 
     void Awake()
     {
@@ -120,6 +123,8 @@ public class GestionnaireJeu : MonoBehaviour
     {
         partieEnCours = false;
         gestionnaireSpawn.ArreterSpawn();
+
+        onFinDePartie?.Invoke(numeroTour - 1); // passe le nb de tours complétés
 
         // Vibration de fin longue sur les deux contrôleurs
         if (controleurGauche != null)
