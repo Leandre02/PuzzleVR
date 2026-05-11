@@ -1,14 +1,12 @@
 using UnityEngine;
-using TMPro;
 using System;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 /// <summary>
-/// Classe centrale pour gérer le déroulement du jeu : démarrage, fin, score, minuterie, et transitions entre les différents panneaux UI
-/// S'appuie sur les patterns de GameManager et d'UI en World Space vus dans les notes et exercices (UI VR, GameManager)
-/// et sur les consignes du travail pratique Whack-a-Mole VR.
+/// Classe centrale pour gérer le déroulement du jeu : démarrage, fin, score, minuterie.
+/// La gestion de l'UI est déléguée à GestionnaireCanvas.
 /// Références :
 ///  - Cégep de Victoriaville. UI en VR. Environnements Immersifs, 2026.
 ///  - Cégep de Victoriaville. Exercice 4.2 — UI VR et GameManager. Environnements Immersifs, 2026.
@@ -16,24 +14,11 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 /// </summary>
 public class GestionnaireJeu : MonoBehaviour
 {
-    // Singleton de GestionnaireJeu pour permettre à d'autres scripts d'y accéder facilement
     public static GestionnaireJeu instance;
 
     [Header("Durée")]
     [SerializeField] private float dureeInitiale = 60f;
     [SerializeField] private float bonusParTour = 15f;
-
-    [Header("UI - Panneau Jeu")]
-    [SerializeField] private TextMeshProUGUI texteTour;
-    [SerializeField] private TextMeshProUGUI texteMinuterie;
-
-    [Header("UI - Panneaux")]
-    [SerializeField] private GameObject panneauMenu;
-    [SerializeField] private GameObject panneauJeu;
-    [SerializeField] private GameObject panneauFin;
-
-    [Header("UI - Fin de partie")]
-    [SerializeField] private TextMeshProUGUI texteScoreFinal;
 
     [Header("Références")]
     [SerializeField] private GestionnaireSpawn gestionnaireSpawn;
@@ -47,17 +32,12 @@ public class GestionnaireJeu : MonoBehaviour
     private float tempsRestant;
     private bool partieEnCours = false;
 
-    public static event Action onDebutPartie; // Event pour signaler le debut de la partie
-    public static event Action<int> onFinDePartie; // Event pour signaler la fin de partie avec le score final
+    public static event Action onDebutPartie;
+    public static event Action<int> onFinDePartie;
 
     void Awake()
     {
         instance = this;
-
-        // État initial — on montre le menu
-        panneauMenu.SetActive(true);
-        panneauJeu.SetActive(false);
-        panneauFin.SetActive(false);
     }
 
     /// <summary>
@@ -70,13 +50,9 @@ public class GestionnaireJeu : MonoBehaviour
         partieEnCours = true;
 
         onDebutPartie?.Invoke();
-
-        panneauMenu.SetActive(false);
-        panneauJeu.SetActive(true);
-        panneauFin.SetActive(false);
+        GestionnaireCanvas.instance.MettreAJourHUD(numeroTour, tempsRestant);
 
         gestionnaireSpawn.DemarrerSpawn();
-        MettreAJourUI();
     }
 
     void Update()
@@ -85,7 +61,8 @@ public class GestionnaireJeu : MonoBehaviour
 
         tempsRestant -= Time.deltaTime;
         tempsRestant = Mathf.Max(0, tempsRestant);
-        texteMinuterie.text = Mathf.CeilToInt(tempsRestant).ToString();
+
+        GestionnaireCanvas.instance.MettreAJourHUD(numeroTour, tempsRestant);
 
         if (tempsRestant <= 0)
         {
@@ -95,33 +72,23 @@ public class GestionnaireJeu : MonoBehaviour
 
     /// <summary>
     /// Appelée par GestionnairePuzzle quand toutes les pièces sont placées.
-    /// Lance un nouveau tour avec un bonus de temps.
     /// </summary>
     public void TourComplete()
     {
         if (!partieEnCours) return;
 
-        // Petite vibration de succès sur les deux contrôleurs
-        if (controleurGauche != null)
-        {
-            controleurGauche.SendHapticImpulse(0.6f, 0.15f);
-        }
-        if (controleurDroit != null)
-        {
-            controleurDroit.SendHapticImpulse(0.6f, 0.15f);
-        }
+        if (controleurGauche != null) controleurGauche.SendHapticImpulse(0.6f, 0.15f);
+        if (controleurDroit != null) controleurDroit.SendHapticImpulse(0.6f, 0.15f);
 
-        // Passage au tour suivant
         numeroTour++;
         tempsRestant += bonusParTour;
 
-        // Reset du puzzle pour un nouveau tour
         ResetPuzzle();
-        MettreAJourUI();
+        GestionnaireCanvas.instance.MettreAJourHUD(numeroTour, tempsRestant);
     }
 
     /// <summary>
-    /// Appelée quand le temps atteint zéro. Termine la partie et affiche le score final.
+    /// Termine la partie quand le temps atteint zéro.
     /// </summary>
     void FinDePartie()
     {
@@ -136,28 +103,14 @@ public class GestionnaireJeu : MonoBehaviour
 
         gestionnaireSpawn.ArreterSpawn();
 
-        onFinDePartie?.Invoke(numeroTour - 1); // passe le nb de tours complétés
+        if (controleurGauche != null) controleurGauche.SendHapticImpulse(1f, 0.5f);
+        if (controleurDroit != null) controleurDroit.SendHapticImpulse(1f, 0.5f);
 
-        // Vibration de fin longue sur les deux contrôleurs
-        if (controleurGauche != null)
-        {
-            controleurGauche.SendHapticImpulse(1f, 0.5f);
-        }
-        if (controleurDroit != null)
-        {
-            controleurDroit.SendHapticImpulse(1f, 0.5f);
-        }
-
-        // Affichage du score final
-        panneauJeu.SetActive(false);
-        panneauFin.SetActive(true);
-
-        int toursCompletes = numeroTour - 1;
-        texteScoreFinal.text = "Tours complétés : " + toursCompletes;
+        onFinDePartie?.Invoke(numeroTour - 1);
     }
 
     /// <summary>
-    /// Permet de recommencer une nouvelle partie, appelée par le bouton "Rejouer" du panneau de fin
+    /// Recommence une nouvelle partie, appelée par le bouton "Rejouer"
     /// </summary>
     public void NouvellePartie()
     {
@@ -166,33 +119,21 @@ public class GestionnaireJeu : MonoBehaviour
     }
 
     /// <summary>
-    /// Met à jour l'affichage du tour et du temps restant dans l'UI
-    /// </summary>
-    void MettreAJourUI()
-    {
-        texteTour.text = "Tour " + numeroTour;
-        texteMinuterie.text = Mathf.CeilToInt(tempsRestant).ToString();
-    }
-
-    /// <summary>
     /// Réinitialise le puzzle, détruit les pièces actuelles et demande un nouveau spawn
     /// </summary>
     void ResetPuzzle()
     {
-        // Détruit les pièces existantes
         GameObject[] pieces = GameObject.FindGameObjectsWithTag("Piece");
         foreach (GameObject piece in pieces)
         {
             Destroy(piece);
         }
 
-        // Réinitialise le compteur de sockets du puzzle
         if (gestionnairePuzzle != null)
         {
             gestionnairePuzzle.Reset();
         }
 
-        // Relance un spawn pour le nouveau tour
         gestionnaireSpawn.DemarrerSpawn();
     }
 }

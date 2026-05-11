@@ -25,6 +25,10 @@ public class BateauQuiPart : MonoBehaviour
         GestionnaireJeu.onDebutPartie -= OnDebutPartie;
     }
 
+    /// <summary>
+    /// Téléporte le bateau à une position éloignée pour simuler son départ à la fin de la partie.
+    /// </summary>
+    /// <param name="toursCompletes"></param>
     private void OnFinDePartie(int toursCompletes)
     {
         transform.position = new Vector3(0, -100f, 0);
