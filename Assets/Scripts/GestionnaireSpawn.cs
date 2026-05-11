@@ -1,13 +1,10 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 /// <summary>
-/// Classe pour gérer le spawn des pièces du puzzle à des points aléatoires.
-/// Chaque pièce est spawnée une seule fois par tour.
-/// Inspirée des exercices de VR où des objets sont instanciés dynamiquement via des coroutines.
-/// Références :
-///  - Cégep de Victoriaville. Exercice 3 — Peinture VR. Environnements Immersifs, 2026.
-///  - Cégep de Victoriaville. Travail pratique — Whack-a-Mole VR. Environnements Immersifs, 2026.
+/// Spawne les pièces une par une. La pièce suivante apparaît
+/// seulement quand la précédente est correctement placée.
 /// </summary>
 public class GestionnaireSpawn : MonoBehaviour
 {
@@ -20,18 +17,31 @@ public class GestionnaireSpawn : MonoBehaviour
     [Header("Points de spawn")]
     [SerializeField] private Transform[] pointsDeSpawn;
 
-    private Coroutine spawnRoutine;
+    private int indexPiece = 0;
+
+    private GameObject pieceActuelle;
+    [SerializeField] private float delaiRespawn = 3f;
+
+    void OnEnable()
+    {
+        GestionnairePuzzle.OnPieceDeposee += SpawnProchainepiece;
+        
+    }
+
+    void OnDisable()
+    {
+        GestionnairePuzzle.OnPieceDeposee -= SpawnProchainepiece;
+       
+    }
 
     /// <summary>
-    /// Appelée par GestionnaireJeu quand un tour commence
+    /// Appelée par GestionnaireJeu au début de chaque tour
     /// </summary>
     public void DemarrerSpawn()
     {
-        if (spawnRoutine != null)
-        {
-            StopCoroutine(spawnRoutine);
-        }
-        spawnRoutine = StartCoroutine(SpawnPieces());
+        indexPiece = 0;
+        pieceActuelle = null;
+        StartCoroutine(SpawnAvecDelai()); // spawn la première pièce
     }
 
     /// <summary>
@@ -39,46 +49,47 @@ public class GestionnaireSpawn : MonoBehaviour
     /// </summary>
     public void ArreterSpawn()
     {
-        if (spawnRoutine != null)
-        {
-            StopCoroutine(spawnRoutine);
-            spawnRoutine = null;
-        }
+        StopAllCoroutines();
     }
 
     /// <summary>
-    /// Spawne chaque pièce une seule fois à un point aléatoire
+    /// Spawne la prochaine pièce dans la liste
     /// </summary>
-    IEnumerator SpawnPieces()
+    void SpawnProchainepiece()
     {
-        // Mélange les points de spawn pour que chaque pièce aille à un point différent
-        Transform[] pointsMelanges = MelangerPoints();
+        ArreterSpawn();
+        pieceActuelle = null; // pièce placée, on passe à la suivante
+        indexPiece++; 
 
-        for (int i = 0; i < prefabsPieces.Length; i++)
-        {
-            // Un point de spawn différent pour chaque pièce
-            Transform point = pointsMelanges[i % pointsMelanges.Length];
+        if (indexPiece >= prefabsPieces.Length) return;
 
-            Instantiate(prefabsPieces[i], point.position, Quaternion.identity);
-
-            yield return new WaitForSeconds(delaiEntreSpawns);
-        }
+        StartCoroutine(SpawnAvecDelai());
     }
 
-    /// <summary>
-    /// Mélange aléatoirement les points de spawn
-    /// Code généré par Claude sonnet 4.6, Mars 2026
-    /// </summary>
-    Transform[] MelangerPoints()
+    IEnumerator SpawnAvecDelai()
     {
-        Transform[] copie = (Transform[])pointsDeSpawn.Clone();
-        for (int i = copie.Length - 1; i > 0; i--)
+        yield return new WaitForSeconds(delaiEntreSpawns);
+
+        while (indexPiece < prefabsPieces.Length)
         {
-            int j = Random.Range(0, i + 1);
-            Transform temp = copie[i];
-            copie[i] = copie[j];
-            copie[j] = temp;
+            if (pieceActuelle != null)
+            {
+                // Vérifie si la pièce est en train d'être tenue
+                var grab = pieceActuelle.GetComponent<XRGrabInteractable>();
+                if (grab != null && grab.isSelected)
+                {
+                    // Joueur tient la pièce - attend sans détruire
+                    yield return new WaitForSeconds(0.5f);
+                    continue;
+                }
+                Destroy(pieceActuelle);
+            }
+
+            int indexPoint = Random.Range(0, pointsDeSpawn.Length);
+            pieceActuelle = Instantiate(prefabsPieces[indexPiece],
+                pointsDeSpawn[indexPoint].position, Quaternion.identity);
+
+            yield return new WaitForSeconds(delaiRespawn);
         }
-        return copie;
     }
 }

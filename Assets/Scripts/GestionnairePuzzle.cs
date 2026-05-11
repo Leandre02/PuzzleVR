@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
@@ -14,6 +15,8 @@ public class GestionnairePuzzle : MonoBehaviour
     [SerializeField] private XRSocketInteractor[] sockets;
 
     private int nbSocketsRemplis = 0;
+
+    public static event Action OnPieceDeposee; // Event pour signaler qu'une pièce a été placée
 
     void OnEnable()
     {
@@ -38,6 +41,7 @@ public class GestionnairePuzzle : MonoBehaviour
     private void OnPiecePlacee(SelectEnterEventArgs args)
     {
         nbSocketsRemplis++;
+        OnPieceDeposee?.Invoke(); // Déclenche l'event pour signaler qu'une pièce a été placée
 
         // Vérifie si tous les sockets sont remplis
         if (nbSocketsRemplis >= sockets.Length)
@@ -69,5 +73,15 @@ public class GestionnairePuzzle : MonoBehaviour
     public void Reset()
     {
         nbSocketsRemplis = 0;
+
+        // Réaffiche tous les fantômes pour le nouveau tour
+        foreach (XRSocketInteractor socket in sockets)
+        {
+            VisuelSocket visuel = socket.GetComponent<VisuelSocket>();
+            if (visuel != null)
+            {
+                visuel.Reset();
+            }
+        }
     }
 }

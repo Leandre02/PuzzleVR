@@ -1,7 +1,9 @@
 using UnityEngine;
 using TMPro;
+using System;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 /// <summary>
 /// Classe centrale pour gérer le déroulement du jeu : démarrage, fin, score, minuterie, et transitions entre les différents panneaux UI
@@ -45,6 +47,9 @@ public class GestionnaireJeu : MonoBehaviour
     private float tempsRestant;
     private bool partieEnCours = false;
 
+    public static event Action onDebutPartie; // Event pour signaler le debut de la partie
+    public static event Action<int> onFinDePartie; // Event pour signaler la fin de partie avec le score final
+
     void Awake()
     {
         instance = this;
@@ -63,6 +68,8 @@ public class GestionnaireJeu : MonoBehaviour
         numeroTour = 1;
         tempsRestant = dureeInitiale;
         partieEnCours = true;
+
+        onDebutPartie?.Invoke();
 
         panneauMenu.SetActive(false);
         panneauJeu.SetActive(true);
@@ -119,7 +126,17 @@ public class GestionnaireJeu : MonoBehaviour
     void FinDePartie()
     {
         partieEnCours = false;
+
+        // Désactive le grab sur les pièces restantes
+        GameObject[] pieces = GameObject.FindGameObjectsWithTag("Piece");
+        foreach (GameObject piece in pieces)
+        {
+            piece.GetComponent<XRGrabInteractable>().enabled = false;
+        }
+
         gestionnaireSpawn.ArreterSpawn();
+
+        onFinDePartie?.Invoke(numeroTour - 1); // passe le nb de tours complétés
 
         // Vibration de fin longue sur les deux contrôleurs
         if (controleurGauche != null)
