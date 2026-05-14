@@ -75,10 +75,19 @@ public class GestionnaireJeu : MonoBehaviour
     /// </summary>
     public void TourComplete()
     {
-        if (!partieEnCours) return;
+        if (!partieEnCours)
+        {
+            return;
+        }
 
-        if (controleurGauche != null) controleurGauche.SendHapticImpulse(0.6f, 0.15f);
-        if (controleurDroit != null) controleurDroit.SendHapticImpulse(0.6f, 0.15f);
+        if (controleurGauche != null)
+        {
+            controleurGauche.SendHapticImpulse(0.6f, 0.15f);
+        }
+        if (controleurDroit != null)
+        {
+            controleurDroit.SendHapticImpulse(0.6f, 0.15f);
+        }
 
         numeroTour++;
         tempsRestant += bonusParTour;
@@ -103,8 +112,14 @@ public class GestionnaireJeu : MonoBehaviour
 
         gestionnaireSpawn.ArreterSpawn();
 
-        if (controleurGauche != null) controleurGauche.SendHapticImpulse(1f, 0.5f);
-        if (controleurDroit != null) controleurDroit.SendHapticImpulse(1f, 0.5f);
+        if (controleurGauche != null)
+        { 
+            controleurGauche.SendHapticImpulse(1f, 0.5f); 
+        }
+        if (controleurDroit != null)
+        {
+            controleurDroit.SendHapticImpulse(1f, 0.5f);
+        }
 
         onFinDePartie?.Invoke(numeroTour - 1);
     }

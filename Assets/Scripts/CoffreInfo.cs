@@ -35,6 +35,10 @@ public class CoffreInfo : MonoBehaviour
         GestionnaireJeu.onFinDePartie -= OnFinDePartie;
     }
 
+    /// <summary>
+    /// Permet d'osciller le coffre de haut en bas pour attirer l'attention du joueur sur le coffre et les infos avant de commencer la partie.
+    /// Code généré par chatgpt modele 5.5, Avril 2026
+    /// </summary>
     void Update()
     {
         if (!partieEnCours)
@@ -43,12 +47,14 @@ public class CoffreInfo : MonoBehaviour
         }
     }
 
+    // Fin code généré par Chatgpt
+
     /// <summary>
     /// Affiche le panneau d'infos et fait vibrer le contrôleur quand le coffre est grab, pour attirer l'attention du joueur sur les infos avant de commencer la partie.
-     /// S'inspire de l'exercice sur les feedbacks VR (haptiques et audio spatial) et de l'utilisation du XR Grab Interactable / événements
-     /// du XR Interaction Toolkit (selectEntered / selectExited).
-     /// Références :
-     ///  - Cégep de Victoriaville. Exercice 4.1 — Feedback VR : haptiques et audio spatial. Environnements Immersifs, 2026. https://envimmersif-cegepvicto.github.io/exercice_feedback_vr/
+    /// S'inspire de l'exercice sur les feedbacks VR (haptiques et audio spatial) et de l'utilisation du XR Grab Interactable / événements
+    /// du XR Interaction Toolkit (selectEntered / selectExited).
+    /// Références :
+    ///  - Cégep de Victoriaville. Exercice 4.1 — Feedback VR : haptiques et audio spatial. Environnements Immersifs, 2026. https://envimmersif-cegepvicto.github.io/exercice_feedback_vr/
     /// </summary>
     /// <param name="args"></param>
     private void OnGrab(SelectEnterEventArgs args)
@@ -62,12 +68,19 @@ public class CoffreInfo : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Initialise l'état de la partie au début d'une session de jeu.
+    /// </summary>
     private void OnDebutPartie()
     {
         partieEnCours = true;
         grab.enabled = false;
     }
 
+    /// <summary>
+    /// Initialise l'état de la partie à la fin d'une session de jeu, réactivant le grab pour permettre au joueur de consulter les infos avant de recommencer une partie.
+    /// </summary>
+    /// <param name="toursCompletes">Le nombre de tours complétés lors de la partie.</param>
     private void OnFinDePartie(int toursCompletes)
     {
         partieEnCours = false;

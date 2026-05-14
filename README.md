@@ -1,15 +1,14 @@
-# Puzzle VR
+# Little Beach VR
 
-**Auteur :** Léandre Kanmegne & Bady Pascal
+**Auteur :** Léandre Kanmegne(2201877) & Bady Pascal(2337083)
 **Cours :** Environnements Immersifs — Cégep de Victoriaville  
 **Session :** Hiver 2026
 
 ## Description
 
-Jeu de puzzle en réalité virtuelle pour Meta Quest 2 développé avec Unity 6.3. Le joueur doit assembler une maquette en récupérant des pièces dispersées dans l'environnement et en les plaçant dans les bons emplacements. Chaque pièce a une forme distincte (cube, cylindre, sphère) qui correspond à un socket spécifique sur la maquette.
+Little Beach est un jeu de **Puzzle Survival en réalité virtuelle** développé pour le casque Meta Quest 2.
 
-Le jeu fonctionne en mode endurance : à chaque tour complété, le joueur gagne du temps bonus pour continuer. La partie se termine lorsque le timer atteint zéro. Le score correspond au nombre de tours complétés.
-
+Le joueur incarne un naufragé échoué sur une petite île. Au loin, un bateau s'éloigne. Il doit trouver les pièces dispersées sur l'ile et les assembler sur la maquette. À chaque pièce correctement placée, 15 secondes sont ajoutées au chrono. La partie se termine quand le temps est écoulé.
 ---
 
 ## Versions et packages
@@ -45,15 +44,30 @@ Le jeu fonctionne en mode endurance : à chaque tour complété, le joueur gagne
 
 ---
 
+## Contrôles
+
+- **Gâchette** : attraper / lâcher une pièce
+- **Joystick** : se déplacer
+
+
+## Installation
+
+Le jeu se déploie en mode développeur sur Meta Quest 2 via Unity 6 LTS.
+
 ## Structure des scripts
 
-| Script                  | Responsabilité                                                       |
-| ----------------------- | -------------------------------------------------------------------- |
-| `GestionnaireJeu.cs`    | États de jeu, timer, score, gestion des panneaux UI, logique de tour |
-| `GestionnaireSpawn.cs`  | Création des pièces aux points de spawn aléatoires                   |
-| `GestionnairePuzzle.cs` | Détection du placement correct via les événements des sockets        |
-| `FeedbackPiece.cs`      | Retour haptique et audio lors du grab d'une pièce                    |
-| `VisuelSocket.cs`       | Gère l'affichage des fantômes guides sur la maquette                 |
+| Script                  | Responsabilité                                                          |
+| ----------------------- | ----------------------------------------------------------------------- |
+| `GestionnaireJeu.cs`    | États de jeu, timer, score, logique de tour, événements de partie       |
+| `GestionnaireCanvas.cs` | Gestion centralisée de l'affichage et navigation entre les panneaux UI  |
+| `GestionnaireSpawn.cs`  | Spawn progressif des pièces avec respawn aléatoire jusqu'au grab        |
+| `GestionnairePuzzle.cs` | Détection du placement correct via les événements des sockets           |
+| `GestionnaireAudio.cs`  | Gestion de la musique de menu et de jeu via les événements              |
+| `FeedbackPiece.cs`      | Retour haptique et son spatial lors du grab d'une pièce                 |
+| `VisuelSocket.cs`       | Affichage et masquage des fantômes guides sur la maquette               |
+| `AligneurSocket.cs`     | Alignement automatique des sockets sur les pièces fantômes au démarrage |
+| `CoffreInfo.cs`         | Coffre interactif qui affiche le panneau d'instructions au menu         |
+| `BateauQuiPart.cs`      | Téléporte le bateau au loin à la fin de la partie                       |
 
 La communication entre `GestionnairePuzzle` et `GestionnaireJeu` se fait via un singleton (`GestionnaireJeu.instance`). La détection du placement utilise les événements `selectEntered` du XR Interaction Toolkit, ce qui évite les vérifications manuelles de tag — la validation de la bonne forme est entièrement déléguée aux Interaction Layer Masks configurés sur chaque socket.
 
@@ -93,3 +107,5 @@ Toutes les décisions d'implémentation, la configuration de la scène Unity et 
 - Cégep de Victoriaville. _Exercice 4.2 — UI VR et GameManager_. Environnements Immersifs, 2026.
 - Cégep de Victoriaville. _Configuration VR dans Unity_. Environnements Immersifs, 2026.
 - Unity Technologies. _XR Interaction Toolkit Documentation_. docs.unity3d.com, 2024.
+- OpenAI. (2026). ChatGPT (version 5.5, avril 2026). https://chatgpt.com/ 
+- Anthropic. (2026). Claude (Sonnet 4.6 mars 2026). https://claude.ai/ 

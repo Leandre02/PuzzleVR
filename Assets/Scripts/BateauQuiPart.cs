@@ -34,6 +34,9 @@ public class BateauQuiPart : MonoBehaviour
         transform.position = new Vector3(0, -100f, 0);
     }
 
+    /// <summary>
+    /// Place le bateau à sa position de départ au début de la partie, pour qu'il soit visible dans le menu et pendant la partie.
+    /// </summary>
     private void OnDebutPartie()
     {
        

@@ -2659,10 +2659,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Contr\xF4les\n\nG\xE2chette : attraper / l\xE2cher\nJoystick : se d\xE9placer\n\nM\xE9caniques\nChaque
-    pi\xE8ce plac\xE9e correctement ajoute 15 secondes. Sois rapide et pr\xE9cis
-    avant que le temps ne s'\xE9coule.\n\nBut du jeu\nFaire le meilleur score possible
-    avant que le temps ne soit \xE9coul\xE9."
+  m_text: "Contr\xF4les\n\nG\xE2chette : attraper / l\xE2cher\nJoystick : se d\xE9placer\nGrab
+    le coffre pour en savoir plus\n\nM\xE9caniques\nChaque pi\xE8ce plac\xE9e correctement
+    ajoute 15 secondes. Sois rapide et pr\xE9cis avant que le temps ne s'\xE9coule.\n\nBut
+    du jeu\nFaire le meilleur score possible avant que le temps ne soit \xE9coul\xE9."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8164f55f9a561dc42a20629cd84b8fe1, type: 2}
   m_sharedMaterial: {fileID: 4823827137163398129, guid: 8164f55f9a561dc42a20629cd84b8fe1, type: 2}
@@ -2689,8 +2689,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 32
+  m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
