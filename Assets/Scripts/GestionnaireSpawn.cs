@@ -66,6 +66,11 @@ public class GestionnaireSpawn : MonoBehaviour
         StartCoroutine(SpawnAvecDelai());
     }
 
+    /// <summary>
+    /// Coroutine pour spawner une pièce après un délai, en vérifiant si la pièce précédente est encore tenue par le joueur. Si oui, on attend avant de détruire et de spawn la suivante.
+    /// Code genéré par Claude sonnet 4.6, Mars 2026
+    /// </summary>
+    /// <returns></returns>
     IEnumerator SpawnAvecDelai()
     {
         yield return new WaitForSeconds(delaiEntreSpawns);
@@ -78,7 +83,7 @@ public class GestionnaireSpawn : MonoBehaviour
                 var grab = pieceActuelle.GetComponent<XRGrabInteractable>();
                 if (grab != null && grab.isSelected)
                 {
-                    // Joueur tient la pièce - attend sans détruire
+                    // Joueur tient la pièce et attend sans détruire
                     yield return new WaitForSeconds(0.5f);
                     continue;
                 }
@@ -92,4 +97,5 @@ public class GestionnaireSpawn : MonoBehaviour
             yield return new WaitForSeconds(delaiRespawn);
         }
     }
+    // Fin code généré par Claude
 }
